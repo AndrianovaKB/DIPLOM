@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="captureButton">Capture</button>
+    <br>
+    <img id="uploadedImage" src="" alt="Uploaded Image">
+    <p id="emotion"></p>
+
+    <script>
+        $(document).ready(function(){
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.error('Error accessing the camera: ' + err);
+            });
+
+            $('#captureButton').click(function(){
+                var canvas = document.createElement('canvas');
+                var video = document.getElementById('video');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                var context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                var dataURL = canvas.toDataURL('image/jpeg');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/upload',
+                    data: { image: dataURL },
+                    success: function(response){
+                        $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
+                        $('#emotion').text('Detected Emotion: ' + response.emotion);
+                    },
+                    error: function(xhr, status, error){
+                        console.error(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
