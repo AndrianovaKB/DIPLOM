@@ -4,12 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+        #video {
+            margin-top: 20px;
+        }
+        #captureButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        #uploadInput {
+            margin-top: 20px;
+        }
+        #uploadedImage {
+            margin-top: 20px;
+            max-width: 100%;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+        #emotion {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        #emotionProbabilities {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+        .dominant-emotion {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Emotion Detection</h1>
     <video id="video" width="640" height="480" autoplay></video>
-    <button id="captureButton">Capture</button>
+    <button id="captureButton">Распознать</button>
+    <input type="file" id="uploadInput">
     <br>
     <img id="uploadedImage" src="" alt="Uploaded Image">
     <p id="emotion"></p>
@@ -41,21 +92,60 @@
                     url: '/upload',
                     data: { image: dataURL },
                     success: function(response){
-                        $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
-                        $('#emotion').text('Detected Emotion: ' + response.emotion);
-                        var emotionProbabilitiesText = '';
-                        var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
-                            return response.emotionProbabilities[b] - response.emotionProbabilities[a];
-                        });
-                        sortedEmotions.forEach(function(emotion) {
-                            emotionProbabilitiesText += emotion + ': ' + response.emotionProbabilities[emotion].toFixed(4) + '<br>';
-                        });
-                        $('#emotionProbabilities').html('Emotion Probabilities:<br>' + emotionProbabilitiesText);
+                        // Преобразование base64 изображения в объект Image для получения его размеров
+                        var img = new Image();
+                        img.src = 'data:image/jpeg;base64,' + response.image;
+                        img.onload = function() {
+                            var faceWidth = this.width;
+                            var faceHeight = this.height;
+                            var emotionProbabilitiesText = '';
+                            var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
+                                return response.emotionProbabilities[b] - response.emotionProbabilities[a];
+                            });
+                            sortedEmotions.forEach(function(emotion, index) {
+                                var probability = response.emotionProbabilities[emotion].toFixed(4);
+                                emotionProbabilitiesText += '<span class="' + (index === 0 ? 'dominant-emotion' : '') + '">' + emotion + ': ' + probability + '</span><br>';
+                            });
+                            $('#emotionProbabilities').html('<strong>Результаты:</strong><br>' + emotionProbabilitiesText);
+                            $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image)
+                                               .css({ width: faceWidth, height: faceHeight }); // Устанавливаем размер изображения
+                        };
                     },
                     error: function(xhr, status, error){
                         console.error(error);
                     }
                 });
+            });
+
+            $('#uploadInput').change(function(e) {
+                var file = e.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var dataURL = event.target.result;
+                    $('#uploadedImage').attr('src', dataURL);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/upload',
+                        data: { image: dataURL },
+                        success: function(response){
+                            $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
+<!--                            $('#emotion').text('Detected Emotion: ' + response.emotion);-->
+                            var emotionProbabilitiesText = '';
+                            var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
+                                return response.emotionProbabilities[b] - response.emotionProbabilities[a];
+                            });
+                            sortedEmotions.forEach(function(emotion, index) {
+                                var probability = response.emotionProbabilities[emotion].toFixed(4);
+                                emotionProbabilitiesText += '<span class="' + (index === 0 ? 'dominant-emotion' : '') + '">' + emotion + ': ' + probability + '</span><br>';
+                            });
+                            $('#emotionProbabilities').html('<strong>Результаты:</strong><br>' + emotionProbabilitiesText);
+                        },
+                        error: function(xhr, status, error){
+                            console.error(error);
+                        }
+                    });
+                };
+                reader.readAsDataURL(file);
             });
         });
     </script>
