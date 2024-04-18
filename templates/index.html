@@ -13,6 +13,7 @@
     <br>
     <img id="uploadedImage" src="" alt="Uploaded Image">
     <p id="emotion"></p>
+    <div id="emotionProbabilities"></div>
 
     <script>
         $(document).ready(function(){
@@ -42,6 +43,14 @@
                     success: function(response){
                         $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
                         $('#emotion').text('Detected Emotion: ' + response.emotion);
+                        var emotionProbabilitiesText = '';
+                        var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
+                            return response.emotionProbabilities[b] - response.emotionProbabilities[a];
+                        });
+                        sortedEmotions.forEach(function(emotion) {
+                            emotionProbabilitiesText += emotion + ': ' + response.emotionProbabilities[emotion].toFixed(4) + '<br>';
+                        });
+                        $('#emotionProbabilities').html('Emotion Probabilities:<br>' + emotionProbabilitiesText);
                     },
                     error: function(xhr, status, error){
                         console.error(error);

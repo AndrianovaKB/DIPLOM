@@ -11,16 +11,6 @@ model = DCNN()
 # Загрузка вашей модели
 model.load_weights("model_DCNN.weights.h5")
 
-# def detect_face(image):
-#     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-#     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-#     for (x, y, w, h) in faces:
-#         cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
-#         face = image[y:y + h, x:x + w]
-#         return face, (x, y, w, h)
-#     return None, None
-#
 def analyze_emotion(face):
     # Предобработка изображения, если это необходимо
     processed_face = preprocess_image(face)
@@ -29,45 +19,13 @@ def analyze_emotion(face):
     # Получение эмоции с наибольшей вероятностью
     emotion_index = np.argmax(emotion_probabilities)
     emotions = ["angry", "disgut", "fear", "happy", "neutral", "sad", "surprise"]
-    emotion = emotions[emotion_index]
-    return emotion
-#
-#
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
-#
-#
-# @app.route('/analyze', methods=['POST'])
-# def analyze():
-#     if 'file' not in request.files:
-#         return "No file part"
-#
-#     file = request.files['file']
-#
-#     image_stream = BytesIO()
-#     file.save(image_stream)
-#     image_stream.seek(0)
-#     file_bytes = np.asarray(bytearray(image_stream.read()), dtype=np.uint8)
-#     frame = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-#
-#     face, (x, y, w, h) = detect_face(frame)
-#
-#     if face is not None:
-#         emotion = analyze_emotion(file)
-#         cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
-#         _, img_encoded = cv2.imencode('.jpg', frame)
-#         img_base64 = base64.b64encode(img_encoded).decode('utf-8')
-#         result = {'region': 'data:image/jpeg;base64,' + img_base64, 'dominant_emotion': emotion}
-#         return render_template('result.html', result=result)
-#     else:
-#         return "No face detected"
-#
-#
-#
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
+    dominant_emotion = emotions[emotion_index]
+    # Преобразование вероятностей к типу float
+    emotion_probabilities = emotion_probabilities.flatten().astype(float)
+    # Создание словаря с вероятностями каждой эмоции в порядке убывания
+    emotion_probabilities_sorted = sorted(zip(emotions, emotion_probabilities), key=lambda x: x[1], reverse=True)
+    all_emotions = {emotion: round(prob, 4) for emotion, prob in emotion_probabilities_sorted}
+    return dominant_emotion, all_emotions
 
 # Глобальные переменные для каскадов Хаара
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -113,11 +71,11 @@ def upload():
     _, buffer = cv2.imencode('.jpg', detected_face_img)
     img_str = base64.b64encode(buffer).decode('utf-8')
 
-    print(detected_face_img)
     # Вызов функции для определения эмоции
-    emotion = analyze_emotion(detected_face_img)
+    dominant_emotion, all_emotions = analyze_emotion(detected_face_img)
+    print(all_emotions)
+    return jsonify({'image': img_str, 'emotion': dominant_emotion, 'emotionProbabilities': all_emotions})
 
-    return jsonify({'image': img_str, 'emotion': emotion})
 
 if __name__ == '__main__':
     app.run(debug=True)
