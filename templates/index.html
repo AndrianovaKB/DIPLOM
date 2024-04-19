@@ -92,27 +92,30 @@
                     url: '/upload',
                     data: { image: dataURL },
                     success: function(response){
-                        // Преобразование base64 изображения в объект Image для получения его размеров
-                        var img = new Image();
-                        img.src = 'data:image/jpeg;base64,' + response.image;
-                        img.onload = function() {
-                            var faceWidth = this.width;
-                            var faceHeight = this.height;
-                            var emotionProbabilitiesText = '';
-                            var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
-                                return response.emotionProbabilities[b] - response.emotionProbabilities[a];
-                            });
-                            sortedEmotions.forEach(function(emotion, index) {
-                                var probability = response.emotionProbabilities[emotion].toFixed(4);
-                                emotionProbabilitiesText += '<span class="' + (index === 0 ? 'dominant-emotion' : '') + '">' + emotion + ': ' + probability + '</span><br>';
-                            });
-                            $('#emotionProbabilities').html('<strong>Результаты:</strong><br>' + emotionProbabilitiesText);
-                            $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image)
-                                               .css({ width: faceWidth, height: faceHeight }); // Устанавливаем размер изображения
-                        };
+                        if ('error' in response) {
+                            // Отображение сообщения об ошибке
+                            $('#emotionProbabilities').html('<strong>Error:</strong> ' + response.error);
+                            // Очистка изображения
+                            $('#uploadedImage').attr('src', '');
+                            return;
+                        }
+                        var emotionProbabilitiesText = '';
+                        var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
+                            return response.emotionProbabilities[b] - response.emotionProbabilities[a];
+                        });
+                        sortedEmotions.forEach(function(emotion, index) {
+                            var probability = response.emotionProbabilities[emotion].toFixed(4);
+                            emotionProbabilitiesText += '<span class="' + (index === 0 ? 'dominant-emotion' : '') + '">' + emotion + ': ' + probability + '</span><br>';
+                        });
+                        $('#emotionProbabilities').html('<strong>Результаты:</strong><br>' + emotionProbabilitiesText);
+                        $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
                     },
                     error: function(xhr, status, error){
                         console.error(error);
+                        // Отображение сообщения об ошибке
+                        $('#emotionProbabilities').html('<strong>Error:</strong> ' + error);
+                        // Очистка изображения
+                        $('#uploadedImage').attr('src', '');
                     }
                 });
             });
@@ -122,14 +125,19 @@
                 var reader = new FileReader();
                 reader.onload = function(event) {
                     var dataURL = event.target.result;
-                    $('#uploadedImage').attr('src', dataURL);
+<!--                    $('#uploadedImage').attr('src', dataURL);-->
                     $.ajax({
                         type: 'POST',
                         url: '/upload',
                         data: { image: dataURL },
                         success: function(response){
-                            $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
-<!--                            $('#emotion').text('Detected Emotion: ' + response.emotion);-->
+                            if ('error' in response) {
+                                // Отображение сообщения об ошибке
+                                $('#emotionProbabilities').html('<strong>Error:</strong> ' + response.error);
+                                // Очистка изображения
+                                $('#uploadedImage').attr('src', '');
+                                return;
+                            }
                             var emotionProbabilitiesText = '';
                             var sortedEmotions = Object.keys(response.emotionProbabilities).sort(function(a, b) {
                                 return response.emotionProbabilities[b] - response.emotionProbabilities[a];
@@ -139,10 +147,15 @@
                                 emotionProbabilitiesText += '<span class="' + (index === 0 ? 'dominant-emotion' : '') + '">' + emotion + ': ' + probability + '</span><br>';
                             });
                             $('#emotionProbabilities').html('<strong>Результаты:</strong><br>' + emotionProbabilitiesText);
+                            $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
                         },
                         error: function(xhr, status, error){
                             console.error(error);
-                        }
+                            // Отображение сообщения об ошибке
+                            $('#emotionProbabilities').html('<strong>Error:</strong> ' + error);
+                            // Очистка изображения
+                            $('#uploadedImage').attr('src', '');
+                            }
                     });
                 };
                 reader.readAsDataURL(file);
