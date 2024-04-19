@@ -7,38 +7,54 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #333; /* Темно-серый фон */
+            background-image: url("/static/Images/wallpaper.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: white; /* Белый текст */
+            color: white;
+        }
+        #titleContainer {
+            background-color: #696969;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px; /* Отступ снизу */
+            position: relative;
+            z-index: 1;
+            width: 640px; /* Ширина контейнера для названия, равная ширине content */
+            text-align: center;
         }
         h1 {
-            margin-top: 20px;
-            color: white; /* Белый текст */
-            font-size: 36px; /* Крупный размер */
-            font-family: 'Arial Black', sans-serif; /* Красивый шрифт */
+            margin: 0;
+            font-size: 36px;
+            font-family: 'Brush Script MT', cursive;
         }
         #content {
-            background-color: white; /* Белый фон */
-            border-radius: 10px; /* Закругленные углы */
-            padding: 20px; /* Отступы внутри прямоугольника */
-            margin-top: 20px; /* Отступ сверху */
-            display: flex; /* Расположение элементов внутри */
-            flex-direction: column; /* Вертикальное расположение элементов */
-            align-items: center; /* Выравнивание по центру */
+        background-color: #696969;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 640px;
+        position: relative;
+        z-index: 0;
+        margin-top: 10px;
         }
+
         #videoWrapper {
-            margin-top: 20px;
-            position: relative;
-            border: 1px solid #888; /* Тонкая рамка вокруг видео */
-            border-radius: 5px; /* Закругленные углы */
-            overflow: hidden; /* Скрытие лишней части изображения */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        margin-top: 20px;
+        position: relative;
+        border: 1px solid #888;
+        border-radius: 5px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px; /* Небольшое расстояние под камерой */
         }
         #video {
             width: 640px;
@@ -48,60 +64,65 @@
             max-width: 100%;
             border: 2px solid #ccc;
             border-radius: 5px;
-            margin-top: 20px; /* Отступ сверху */
-            display: block; /* Сделать видимым */
+            margin-top: 20px;
+            display: block;
         }
         #emotionProbabilities {
             margin-top: 20px;
             font-size: 16px;
             color: black;
             text-align: left;
-            width: 200px; /* Ширина блока с вероятностями */
+            width: 200px;
         }
         .dominant-emotion {
             color: red;
             font-weight: bold;
         }
-        #captureButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            background-color: #777; /* Серый цвет кнопки */
-            color: white;
-            cursor: pointer;
-            border-radius: 10px; /* Закругленные углы */
-            margin-top: 20px; /* Отступ сверху */
-            margin-bottom: 20px; /* Отступ снизу */
+        #buttonContainer {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
         }
+        #captureButton,
         #uploadButton {
             padding: 10px 20px;
             font-size: 16px;
             border: none;
-            background-color: #777; /* Серый цвет кнопки */
+            background-color: #777;
             color: white;
             cursor: pointer;
-            border-radius: 10px; /* Закругленные углы */
-            margin-top: 20px; /* Отступ сверху */
-            margin-bottom: 20px; /* Отступ снизу */
+            border-radius: 10px;
+            width: 50%; /* Равномерное распределение ширины между кнопками */
+            text-align: center; /* Выравнивание текста по центру */
+            box-sizing: border-box; /* Учитываем отступы и границы в размере */
+        }
+
+        #uploadButton {
+            margin-right: 10px; /* Небольшое расстояние между кнопками */
         }
         #uploadInput {
-            display: none; /* Скрыть стандартную кнопку загрузки */
+            display: none;
         }
-    </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</style>
 </head>
 <body>
-    <h1>Emotion Detection</h1>
+    <div id="titleContainer">
+        <h1>EMOTION DETECTION</h1>
+    </div>
     <div id="content">
-        <button id="uploadButton" onclick="document.getElementById('uploadInput').click();">Загрузить изображение</button>
-        <input type="file" id="uploadInput" style="display: none;">
         <div id="videoWrapper">
             <video id="video" width="640" height="480" autoplay></video>
         </div>
-        <button id="captureButton">Распознать</button>
-        <img id="uploadedImage" src="" alt="Uploaded Image">
+        <div id="buttonContainer">
+            <button id="uploadButton" onclick="document.getElementById('uploadInput').click();">Загрузить изображение и распознать</button>
+            <button id="captureButton">Распознать с камеры</button>
+        </div>
+        <input type="file" id="uploadInput">
+        <br>
+        <img id="uploadedImage" src="" alt="">
         <div id="emotionProbabilities"></div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function(){
             navigator.mediaDevices.getUserMedia({ video: true })
