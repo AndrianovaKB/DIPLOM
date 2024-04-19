@@ -7,67 +7,101 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            background-color: #333; /* Темно-серый фон */
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            color: white; /* Белый текст */
         }
         h1 {
             margin-top: 20px;
-            color: #333;
+            color: white; /* Белый текст */
+            font-size: 36px; /* Крупный размер */
+            font-family: 'Arial Black', sans-serif; /* Красивый шрифт */
+        }
+        #content {
+            background-color: white; /* Белый фон */
+            border-radius: 10px; /* Закругленные углы */
+            padding: 20px; /* Отступы внутри прямоугольника */
+            margin-top: 20px; /* Отступ сверху */
+            display: flex; /* Расположение элементов внутри */
+            flex-direction: column; /* Вертикальное расположение элементов */
+            align-items: center; /* Выравнивание по центру */
+        }
+        #videoWrapper {
+            margin-top: 20px;
+            position: relative;
+            border: 1px solid #888; /* Тонкая рамка вокруг видео */
+            border-radius: 5px; /* Закругленные углы */
+            overflow: hidden; /* Скрытие лишней части изображения */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #video {
-            margin-top: 20px;
-        }
-        #captureButton {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-        }
-        #uploadInput {
-            margin-top: 20px;
+            width: 640px;
+            height: 480px;
         }
         #uploadedImage {
-            margin-top: 20px;
             max-width: 100%;
-            border: 2px solid #333;
+            border: 2px solid #ccc;
             border-radius: 5px;
-        }
-        #emotion {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
+            margin-top: 20px; /* Отступ сверху */
+            display: block; /* Сделать видимым */
         }
         #emotionProbabilities {
             margin-top: 20px;
             font-size: 16px;
-            color: #333;
+            color: black;
             text-align: left;
+            width: 200px; /* Ширина блока с вероятностями */
         }
         .dominant-emotion {
             color: red;
             font-weight: bold;
+        }
+        #captureButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #777; /* Серый цвет кнопки */
+            color: white;
+            cursor: pointer;
+            border-radius: 10px; /* Закругленные углы */
+            margin-top: 20px; /* Отступ сверху */
+            margin-bottom: 20px; /* Отступ снизу */
+        }
+        #uploadButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #777; /* Серый цвет кнопки */
+            color: white;
+            cursor: pointer;
+            border-radius: 10px; /* Закругленные углы */
+            margin-top: 20px; /* Отступ сверху */
+            margin-bottom: 20px; /* Отступ снизу */
+        }
+        #uploadInput {
+            display: none; /* Скрыть стандартную кнопку загрузки */
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Emotion Detection</h1>
-    <input type="file" id="uploadInput">
-    <br>
-    <div style="display: flex; justify-content: center; align-items: center;">
-        <video id="video" width="640" height="480" autoplay></video>
+    <div id="content">
+        <button id="uploadButton" onclick="document.getElementById('uploadInput').click();">Загрузить изображение</button>
+        <input type="file" id="uploadInput" style="display: none;">
+        <div id="videoWrapper">
+            <video id="video" width="640" height="480" autoplay></video>
+        </div>
+        <button id="captureButton">Распознать</button>
+        <img id="uploadedImage" src="" alt="Uploaded Image">
+        <div id="emotionProbabilities"></div>
     </div>
-    <button id="captureButton">Распознать</button>
-    <br>
-    <img id="uploadedImage" src="" alt="Uploaded Image">
-    <div id="emotionProbabilities"></div>
     <script>
         $(document).ready(function(){
             navigator.mediaDevices.getUserMedia({ video: true })
