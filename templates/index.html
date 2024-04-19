@@ -48,6 +48,7 @@
             margin-top: 20px;
             font-size: 16px;
             color: #333;
+            text-align: left;
         }
         .dominant-emotion {
             color: red;
@@ -58,14 +59,15 @@
 </head>
 <body>
     <h1>Emotion Detection</h1>
-    <video id="video" width="640" height="480" autoplay></video>
-    <button id="captureButton">Распознать</button>
     <input type="file" id="uploadInput">
     <br>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <video id="video" width="640" height="480" autoplay></video>
+    </div>
+    <button id="captureButton">Распознать</button>
+    <br>
     <img id="uploadedImage" src="" alt="Uploaded Image">
-    <p id="emotion"></p>
     <div id="emotionProbabilities"></div>
-
     <script>
         $(document).ready(function(){
             navigator.mediaDevices.getUserMedia({ video: true })
